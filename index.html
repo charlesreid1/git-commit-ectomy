@@ -359,19 +359,13 @@ Total 20 (delta 6), reused 8 (delta 0)
 <p>Now check if it worked:</p>
 <pre><code>$ du -hs .git
  40M    .git
- ```
-
-Success!
-
-## how it worked
-
-If we check the git log we can see what happened - all commits involving `dat` were rewritten. Because git uses the prior commit's hash to make the next commit's hash, _we will rewrite every commit since the first time `dat` was added to the repo_:
-
-New log:
-
 </code></pre>
 
-<p>$ git log --oneline
+<p>Success!</p>
+<h2 id="how-it-worked">how it worked</h2>
+<p>If we check the git log we can see what happened - all commits involving <code>dat</code> were rewritten. Because git uses the prior commit's hash to make the next commit's hash, <em>we will rewrite every commit since the first time <code>dat</code> was added to the repo</em>:</p>
+<p>New log:</p>
+<pre><code>$ git log --oneline
 3c10144 Removing dat
 6f7b8f2 Add bar.txt
 3f70da5 Add foo.txt
@@ -379,13 +373,11 @@ New log:
 df458d0 Adding fat
 5f6e932 Adding dat
 beb8b4f Adding cat
-84d894e Adding bat</p>
-<pre><code>
-Compare to the old log:
-
+84d894e Adding bat
 </code></pre>
 
-<p>$ git log --oneline
+<p>Compare to the old log:</p>
+<pre><code>$ git log --oneline
 d0587c5 Removing dat
 fd76938 Add bar.txt
 8a86eaf Add foo.txt
@@ -393,62 +385,44 @@ c50a272 Adding rat
 423ede3 Adding fat
 b56c10b Adding dat
 beb8b4f Adding cat
-84d894e Adding bat</p>
-<pre><code>
-Note that the &quot;Add cat&quot; commit IDs are identical, 
-but every commit after `dat` was added to the repo is changed. 
+84d894e Adding bat
+</code></pre>
 
-This is because each commit ID is computed using the hash of the prior commit, 
-so if we change one commit ID in history, we change all subsequent commit IDs.
-
-## stitch the patient back up
-
-Of course, for surgeons, as for airline pilots,
-if the last step is screwed up, nothing else counts.
-
-We asked git to forget a file, which it did, 
+<p>Note that the "Add cat" commit IDs are identical, 
+but every commit after <code>dat</code> was added to the repo is changed. </p>
+<p>This is because each commit ID is computed using the hash of the prior commit, 
+so if we change one commit ID in history, we change all subsequent commit IDs.</p>
+<h2 id="stitch-the-patient-back-up">stitch the patient back up</h2>
+<p>Of course, for surgeons, as for airline pilots,
+if the last step is screwed up, nothing else counts.</p>
+<p>We asked git to forget a file, which it did, 
 but that required modifying commits in the 
 git history, which required re-calculating
-commit hashes.
-
-At this point, we have two separate, parallel 
-`master` branches that split when our 
-file `dat` was added to the repo.
-
-If we simply push our branch to the Github remote,
+commit hashes.</p>
+<p>At this point, we have two separate, parallel 
+<code>master</code> branches that split when our 
+file <code>dat</code> was added to the repo.</p>
+<p>If we simply push our branch to the Github remote,
 we will have a huge headache: every commit will have 
 a duplicate, the old branch and the new branch,
-and will show up side-by-side.
-
-To do this correctly, we need to use the force
-when we push:
-
+and will show up side-by-side.</p>
+<p>To do this correctly, we need to use the force
+when we push:</p>
+<pre><code>$ git push origin master --force
 </code></pre>
 
-<p>$ git push origin master --force</p>
-<pre><code>
-This will ensure that Github does not keep duplicate
-copies of all commits.
-
-Here is a screenshot of the repo on github before 
-we ran `git-forget-blob`:
-
-![Commit history before git-forget-blob](/img/before.png)
-
-And a screenshot of the repo after:
-
-![Commit history after git-forget-blob](/img/after.png)
-
-# tips for surgery
-
-**Size up your patient.**
-
-This one-liner lists the 40 largest files in the repo
-(modify the tail line to change the number):
-
-</code></pre>
-
-<p>$ git rev-list --all --objects | \
+<p>This will ensure that Github does not keep duplicate
+copies of all commits.</p>
+<p>Here is a screenshot of the repo on github before 
+we ran <code>git-forget-blob</code>:</p>
+<p><img alt="Commit history before git-forget-blob" src="./img/before.png" /></p>
+<p>And a screenshot of the repo after:</p>
+<p><img alt="Commit history after git-forget-blob" src="./img/after.png" /></p>
+<h1 id="tips-for-surgery">tips for surgery</h1>
+<p><strong>Size up your patient.</strong></p>
+<p>This one-liner lists the 40 largest files in the repo
+(modify the tail line to change the number):</p>
+<pre><code>$ git rev-list --all --objects | \
      sed -n $(git rev-list --objects --all | \
      cut -f1 -d' ' | \
      git cat-file --batch-check | \
@@ -458,10 +432,11 @@ This one-liner lists the 40 largest files in the repo
      tail -n40 | \
      \
      while read hash type size; do
-          echo -n "-e s/$hash/$size/p ";
+          echo -n &quot;-e s/$hash/$size/p &quot;;
      done) | \
      sort -n -k1
-```</p>
+</code></pre>
+
 <p><strong>Get your patient some insurance.</strong> Back up any files 
 you want to remove but keep.</p>
                 
