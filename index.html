@@ -260,7 +260,47 @@
 You should run it on Linux, 
 or use Homebrew's gxargs if 
 on a Mac.</p>
-<h1 id="demo-surgery">demo surgery</h1>
+<h1 id="consult-with-your-doctor">consult with your doctor</h1>
+<p>You should consult with your doctor to determine if a 
+git-commit-ectomy is right for you.</p>
+<p>This one-liner lists the 40 largest files in the repo
+(modify the <code>tail</code> line to change the number):</p>
+<pre><code>$ git rev-list --all --objects | \
+     sed -n $(git rev-list --objects --all | \
+     cut -f1 -d' ' | \
+     git cat-file --batch-check | \
+     grep blob | \
+     sort -n -k 3 | \
+     \
+     tail -n40 | \
+     \
+     while read hash type size; do
+          echo -n &quot;-e s/$hash/$size/p &quot;;
+     done) | \
+     sort -n -r -k1 
+</code></pre>
+
+<p>When you're ready to perform the surgery, append 
+two more lines to get the filenames only, which is what 
+<code>git-forget-blob.sh</code> needs:</p>
+<pre><code>$ git rev-list --all --objects | \
+     sed -n $(git rev-list --objects --all | \
+     cut -f1 -d' ' | \
+     git cat-file --batch-check | \
+     grep blob | \
+     sort -n -k 3 | \
+     \
+     tail -n40 | \
+     \
+     while read hash type size; do
+          echo -n &quot;-e s/$hash/$size/p &quot;;
+     done) | \
+     sort -n -k1 | \
+     cut -f 2 -d' ' | \
+     xargs -n1 basename 
+</code></pre>
+
+<h1 id="demo-surgery-setup">demo surgery: setup</h1>
 <p>Clone an example repo for performing surgery:</p>
 <pre><code>$ git clone https://github.com/charlesreid1/git-commit-ectomy-example
 </code></pre>
@@ -334,17 +374,28 @@ beb8b4f Adding cat
 84d894e Adding bat
 </code></pre>
 
-<h2 id="prep-for-surgery">prep for surgery</h2>
+<h1 id="demo-surgery-procedure">demo surgery: procedure</h1>
+<h2 id="prepare-tools">prepare tools</h2>
 <p>Use <a href="https://tinyurl.com/git-commit-ectomy">git-forget-blob.sh</a>
 to forget the blob. Start by downloading it:</p>
-<pre><code>$ wget https://tinyurl.com/git-forget-blob-sh -O git-forget-blob.sh
+<pre><code>$ wget https://tinyurl.com/git-forget-blob-mac-sh -O git-forget-blob.sh
 $ chmod +x git-forget-blob.sh
 </code></pre>
 
-<p>If you are on a Mac, edit the file to change
-2 occurrences of <code>xargs</code> to <code>gxargs</code>.</p>
-<p>To use it:</p>
-<pre><code>        ./git-forget-blob.sh &lt;name-of-file&gt;
+<p>This script will detect if you are on a Mac,
+and if so, will use the GNU <code>gxargs</code> instead of 
+the BSD <code>xargs</code>. This requires GNU tools to be 
+installed via Homebrew:</p>
+<pre><code>brew install gnu-sed
+</code></pre>
+
+<p>Optional: can use <code>--with-default-names</code> to overwrite
+BSD versions with GNU versions.</p>
+<pre><code>brew install gnu-sed --with-default-names
+</code></pre>
+
+<p>To use the script:</p>
+<pre><code>./git-forget-blob.sh &lt;name-of-file&gt;
 </code></pre>
 
 <h2 id="git-rm">git rm</h2>
@@ -455,6 +506,20 @@ we ran <code>git-forget-blob</code>:</p>
 <p>And a screenshot of the repo after:</p>
 <p><img alt="Commit history after git-forget-blob" src="./img/after.png" /></p>
 <h1 id="tips-for-surgery">tips for surgery</h1>
+<p><strong>Pass the filename <em>only</em> to <code>git-forget-blob.sh</code>.</strong></p>
+<p>This is very important!!!</p>
+<p>The long one-liner in the "Consult with your Doctor" section
+will list the largest files in the repository, with the relative
+path to that file in the repository.</p>
+<p>The git forget blob script needs the name of the file only,
+without a path. </p>
+<p>If you pass it a filename with a path in front, it will not
+permanently remove that file from the git repo, but it will 
+still take a really long time to go through each commit in the
+repo history.</p>
+<p>If you are running <code>git-forget-blob.sh</code> and the size of the 
+<code>.git</code> folder is not going down, this is probably what's 
+going on.</p>
 <p><strong>Size up your patient.</strong></p>
 <p>This one-liner lists the 40 largest files in the repo
 (modify the tail line to change the number):</p>
@@ -470,11 +535,25 @@ we ran <code>git-forget-blob</code>:</p>
      while read hash type size; do
           echo -n &quot;-e s/$hash/$size/p &quot;;
      done) | \
-     sort -n -k1
+     sort -n -k1 | \
+     cut -f 2 -d' ' | \
+     xargs -n1 basename 
 </code></pre>
 
-<p><strong>Get your patient some insurance.</strong> Back up any files 
-you want to remove but keep.</p>
+<p>Note that this extracts the filename only, which is what
+<code>git-forget-blob.sh</code> needs.</p>
+<p><strong>Get your patient some insurance.</strong> </p>
+<p>Back up any files you want to remove but keep.</p>
+<p><strong>Make sure you specify file names without paths.</strong> </p>
+<p>The <code>git-forget-blob.sh</code> script uses blobs in the <code>.git</code> directory.
+These do not contain any relative path information about where in the 
+repository a particular file lives. So you should do this:</p>
+<pre><code>./git-forget-blob.sh super_huge.file
+</code></pre>
+
+<p>not this:</p>
+<pre><code>./git-forget-blob.sh data/my_project/phase_1/proprietary/super_huge.file  # WRONG
+</code></pre>
                 
                   
                 
