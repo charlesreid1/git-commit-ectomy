@@ -265,8 +265,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../ohfuck/" title="Oh Fuck: Send Reinforcements" class="md-nav__link">
-      Oh Fuck: Send Reinforcements
+    <a href="../ohfk/" title="Oh F&!k: Please Send Backup" class="md-nav__link">
+      Oh F&!k: Please Send Backup
     </a>
   </li>
 
@@ -439,10 +439,10 @@ BSD versions with GNU versions.</p>
 </code></pre>
 
 <p>To use the script:</p>
-<pre><code>./git-forget-blob.sh &lt;name-of-file&gt;
+<pre><code>./git-forget-blob.sh &lt;relative-path-to-file&gt;
 </code></pre>
 
-<h2 id="git-rm">git rm</h2>
+<h2 id="the-command-that-doesnt-work-git-rm">the command that doesn't work: git rm</h2>
 <p>Start by checking the size of the repo:</p>
 <pre><code>$ du -hs .git
  50M    .git
@@ -463,7 +463,7 @@ repo is still the same:</p>
 
 <p>Git is cursed with perfect memory, and will not
 forget a large file that's been added to the repo.</p>
-<h2 id="git-forget-blob">git forget blob</h2>
+<h2 id="the-command-that-does-work-git-forget-blob">the command that does work: git forget blob</h2>
 <p>We use <code>git-forget-blob.sh</code> to permanenty remove 
 <code>dat</code> from the repo history and rewrite all commits
 since the file was added:</p>
@@ -485,6 +485,11 @@ Delta compression using up to 4 threads.
 Compressing objects: 100% (19/19), done.
 Writing objects: 100% (20/20), done.
 Total 20 (delta 6), reused 8 (delta 0)
+</code></pre>
+
+<p>REMEMBER: if <code>dat</code> is in a path in the repo, like 
+<code>path/to/dat</code>, you have to pass the <em>full path</em>:</p>
+<pre><code>$ ./git-forget-blob.sh path/to/dat
 </code></pre>
 
 <p>Now check if it worked:</p>
