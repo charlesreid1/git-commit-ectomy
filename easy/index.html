@@ -83,7 +83,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="../#requirements" tabindex="1" class="md-skip">
+      <a href="../#table-of-contents" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -304,7 +304,29 @@
               
                 
                 
-                <h1 id="requirements">requirements</h1>
+                <p>This page walks through a demonstration
+git-commit-ectomy that you can perform
+starting with an empty git repository.
+It addresses the single-branch case.</p>
+<h1 id="table-of-contents">table of contents</h1>
+<ul>
+<li><a href="#requirements">requirements</a></li>
+<li><a href="#consult-with-your-doctor">consult with your doctor</a></li>
+<li><a href="#demo-surgery-setup">demo surgery: setup</a></li>
+<li><a href="#side-note-how-to-make-a-fat-file">side note: how to make a fat file</a></li>
+<li><a href="#step-1-make-several-fat-files">step 1: make several fat files</a></li>
+<li><a href="#commit-files">commit files</a></li>
+<li><a href="#demo-surgery-procedure">demo surgery: procedure</a></li>
+<li><a href="#prepare-tools">prepare tools</a></li>
+<li><a href="#the-command-that-doesnt-work-git-rm">the command that doesn't work: git rm</a></li>
+<li><a href="#the-command-that-does-work-git-forget-blob">the command that does work: git forget blob</a></li>
+<li><a href="#how-it-worked">how it worked</a></li>
+<li><a href="#stitch-the-patient-back-up">stitch the patient back up</a></li>
+<li><a href="#tips-for-surgery">tips for surgery</a></li>
+</ul>
+<p><br />
+<br /></p>
+<h1 id="requirements">requirements</h1>
 <p>This guide utilizes GNU xargs. 
 You should run it on Linux, 
 or use Homebrew's gxargs if 
@@ -329,9 +351,9 @@ git-commit-ectomy is right for you.</p>
      sort -n -r -k1 
 </code></pre>
 
-<p>When you're ready to perform the surgery, append 
-two more lines to get the filenames only, which is what 
-<code>git-forget-blob.sh</code> needs:</p>
+<p>When you're ready to perform the surgery, append two more lines to get the
+relative path to the file <em>only</em>, without listing the size of the file, which
+is what we will need when we carry out the git-commit-ectomy:</p>
 <pre><code>$ git rev-list --all --objects | \
      sed -n $(git rev-list --objects --all | \
      cut -f1 -d' ' | \
@@ -344,9 +366,8 @@ two more lines to get the filenames only, which is what
      while read hash type size; do
           echo -n &quot;-e s/$hash/$size/p &quot;;
      done) | \
-     sort -n -k1 | \
-     cut -f 2 -d' ' | \
-     xargs -n1 basename 
+     sort -n -r -k1 | \
+     cut -f 2 -d' ' 
 </code></pre>
 
 <h1 id="demo-surgery-setup">demo surgery: setup</h1>
@@ -354,7 +375,7 @@ two more lines to get the filenames only, which is what
 <pre><code>$ git clone https://github.com/charlesreid1/git-commit-ectomy-example
 </code></pre>
 
-<h2 id="how-to-make-a-fat-file">how to make a fat file</h2>
+<h2 id="side-note-how-to-make-a-fat-file">side note: how to make a fat file</h2>
 <p>Use <code>dd</code> to create files by assembling 
 a specified number of bits.
 For example, to create a 10 MB file:</p>
@@ -560,53 +581,35 @@ we ran <code>git-forget-blob</code>:</p>
 <p>And a screenshot of the repo after:</p>
 <p><img alt="Commit history after git-forget-blob" src="/img/after.png" /></p>
 <h1 id="tips-for-surgery">tips for surgery</h1>
-<p><strong>Pass the filename <em>only</em> to <code>git-forget-blob.sh</code>.</strong></p>
+<p><strong>Pass the <em>relative path to the file</em> to <code>git-forget-blob.sh</code>.</strong></p>
 <p>This is very important!!!</p>
-<p>The long one-liner in the "Consult with your Doctor" section
+<p>The long one-liner in the <a href="#consult-with-your-doctor">"Consult with your Doctor" section</a>
 will list the largest files in the repository, with the relative
 path to that file in the repository.</p>
-<p>The git forget blob script needs the name of the file only,
-without a path. </p>
-<p>If you pass it a filename with a path in front, it will not
-permanently remove that file from the git repo, but it will 
-still take a really long time to go through each commit in the
-repo history.</p>
+<p>If you pass it a filename without a path to the file,
+the script will most likely complain that the file could
+not be found.</p>
 <p>If you are running <code>git-forget-blob.sh</code> and the size of the 
-<code>.git</code> folder is not going down, this is probably what's 
-going on.</p>
-<p><strong>Size up your patient.</strong></p>
-<p>This one-liner lists the 40 largest files in the repo
-(modify the tail line to change the number):</p>
-<pre><code>$ git rev-list --all --objects | \
-     sed -n $(git rev-list --objects --all | \
-     cut -f1 -d' ' | \
-     git cat-file --batch-check | \
-     grep blob | \
-     sort -n -k 3 | \
-     \
-     tail -n40 | \
-     \
-     while read hash type size; do
-          echo -n &quot;-e s/$hash/$size/p &quot;;
-     done) | \
-     sort -n -k1 | \
-     cut -f 2 -d' ' | \
-     xargs -n1 basename 
-</code></pre>
-
-<p>Note that this extracts the filename only, which is what
-<code>git-forget-blob.sh</code> needs.</p>
+<code>.git</code> folder is not going down, it may be because you are
+specifying an incorrect path to the files you are trying to 
+remove.</p>
+<p><strong>Size up your patient before you start.</strong></p>
+<p>Use the one-liner in the <a href="#consult-with-your-doctor">"Consult with your Doctor" section</a>
+section to size up your patient before you start
+(modify the tail line to change the number of files).</p>
 <p><strong>Get your patient some insurance.</strong> </p>
-<p>Back up any files you want to remove but keep.</p>
-<p><strong>Make sure you specify file names without paths.</strong> </p>
+<p>Back up any files you want to remove but still want to keep.</p>
+<p><strong>Make sure you specify relative paths to file names.</strong> </p>
 <p>The <code>git-forget-blob.sh</code> script uses blobs in the <code>.git</code> directory.
-These do not contain any relative path information about where in the 
-repository a particular file lives. So you should do this:</p>
-<pre><code>./git-forget-blob.sh super_huge.file
+These blobs contain relative path information, so you must specify
+the relative path to the file, like this:</p>
+<pre><code># CORRECT
+./git-forget-blob.sh data/my_project/phase-1/proprietary/super_huge.file
 </code></pre>
 
 <p>not this:</p>
-<pre><code>./git-forget-blob.sh data/my_project/phase_1/proprietary/super_huge.file  # WRONG
+<pre><code># INCORRECT
+./git-forget-blob.sh super_huge.file
 </code></pre>
                 
                   
