@@ -365,7 +365,7 @@
                 
                 <h1 id="git-commit-ectomy">git-commit-ectomy</h1>
 <p>Perform a git-commit-ectomy to forever remove problematic commits from your repo history.</p>
-<p>This uses the <a href="https://tinyurl.com/git-commit-ectomy">git-forget-blob.sh</a> script from @nachoparker.</p>
+<p>This uses the <a href="https://tinyurl.com/git-commit-ectomy">git-forget-blob.sh</a> script from <a href="https://github.com/nachoparker">@nachoparker</a>.</p>
 <p><img alt="git-commit-ectomy main banner image" src="/img/git-commit-ectomy.jpg" /></p>
 <h2 id="what-is-this">what is this</h2>
 <p>This page covers how to perform a git-commit-ectomy.
@@ -399,7 +399,8 @@ shape.</p>
 <p>You should consult with your doctor to determine if a 
 git-commit-ectomy is right for your repository.</p>
 <p>This one-liner lists the 40 largest files in the repo
-(modify the <code>tail</code> line to change the number):</p>
+(modify the <code>tail</code> line to change the number of items
+returned):</p>
 <pre><code>$ git rev-list --all --objects | \
      sed -n $(git rev-list --objects --all | \
      cut -f1 -d' ' | \
