@@ -661,14 +661,12 @@ chmod +x git-forget-blob.sh
 
 <p>Check the size of the <code>.git</code> directory (before):</p>
 <pre><code>$ du -hs .git
-
 290M    .git
 </code></pre>
 
 <p>Now run the git forget blob script and pass the
 relative path to <code>cat_branch1</code> in the repository:</p>
 <pre><code>$ ./git-forget-blob.sh branch1_data/cat_branch1
-
 Enumerating objects: 89, done.
 Counting objects: 100% (89/89), done.
 Delta compression using up to 4 threads.
@@ -689,7 +687,6 @@ Total 43 (delta 7), reused 36 (delta 2)
 <p>Verify that the file was removed by checking the
 size of the <code>.git</code> directory (after):</p>
 <pre><code>$ du -hs .git
-
 100M    .git
 </code></pre>
 
@@ -697,7 +694,6 @@ size of the <code>.git</code> directory (after):</p>
 history, and that no other branches had their histories
 affected:</p>
 <pre><code>$ git lg2
-
 * 4221760 - 2019-04-09 13:45:30 -0700 (4 hours ago) (branch3)
 |           adding branch3_data - C Reid
 | * b83c9aa - 2019-04-09 13:45:28 -0700 (4 hours ago) (branch2)
@@ -745,7 +741,6 @@ source and destination of our rebase operation.</p>
 <p>We start by checking on the log (this uses the same
 repo as resulted from rewriting branch 1 only):</p>
 <pre><code>$ git lg2
-
 * 4221760 - 2019-04-09 13:45:30 -0700 (4 hours ago) (branch3)
 |           adding branch3_data - C Reid
 | * b83c9aa - 2019-04-09 13:45:28 -0700 (4 hours ago) (branch2)
@@ -780,13 +775,11 @@ git checkout branch2
 </code></pre>
 
 <pre><code>$ du -hs .git
-
 100M    .git
 </code></pre>
 
 <p>Now we run the forget blob script:</p>
 <pre><code>$ ./git-forget-blob.sh data1/cat
-
 Enumerating objects: 43, done.
 Counting objects: 100% (43/43), done.
 Delta compression using up to 4 threads.
@@ -893,9 +886,12 @@ git checkout branch2
 </code></pre>
 
 <p>Now rebase branch 1 from the old history onto the new history:</p>
-<pre><code>$ git rebase --onto rebase_dest rebase_src branch1
+<pre><code>$ 
+git rebase --onto rebase_dest rebase_src branch1
+</code></pre>
 
-First, rewinding head to replay your work on top of it...
+<p>You should see output like this:</p>
+<pre><code>First, rewinding head to replay your work on top of it...
 Applying: adding branch1_data
 </code></pre>
 
@@ -921,15 +917,17 @@ Applying: adding branch1_data
 </code></pre>
 
 <p>Repeat the process with branch 3:</p>
-<pre><code>$ git rebase --onto rebase_dest rebase_src branch3
+<pre><code>$
+git rebase --onto rebase_dest rebase_src branch3
+</code></pre>
 
-First, rewinding head to replay your work on top of it...
+<p>You will see output like this:</p>
+<pre><code>First, rewinding head to replay your work on top of it...
 Applying: adding branch3_data
 </code></pre>
 
 <p>Verify that all three branches now share a commit history:</p>
 <pre><code>$ git lg1
-
 * b5642eb - (5 hours ago) adding branch3_data - C Reid (HEAD -&gt; branch3)
 | * 2af1225 - (5 hours ago) adding branch1_data - C Reid (branch1)
 |/
