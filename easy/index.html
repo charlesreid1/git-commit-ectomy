@@ -258,18 +258,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../cherrypicking/" title="Git-Commit-Ectomy the Hard Way: Cherry Picking" class="md-nav__link">
-      Git-Commit-Ectomy the Hard Way: Cherry Picking
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../ohfk/" title="Oh F&!k: Please Send Backup" class="md-nav__link">
       Oh F&!k: Please Send Backup
     </a>
@@ -314,9 +302,11 @@ It addresses the single-branch case.</p>
 <ul>
 <li><a href="#requirements">requirements</a></li>
 <li><a href="#consult-with-your-doctor">consult with your doctor</a></li>
+<li><a href="#an-ascii-art-crash-course-in-surgery">an ascii art crash course in surgery</a></li>
 <li><a href="#demo-surgery-setup">demo surgery: setup</a><ul>
 <li><a href="#side-note-how-to-make-a-fat-file">side note: how to make a fat file</a></li>
-<li><a href="#step-1-make-several-fat-files">step 1: make several fat files</a></li>
+<li><a href="#make-some-text-files">make some text files</a></li>
+<li><a href="#make-some-fat-files">make some fat files</a></li>
 <li><a href="#commit-files">commit files</a></li>
 </ul>
 </li>
@@ -342,7 +332,8 @@ on a Mac.</p>
 git-commit-ectomy is right for you.</p>
 <p>This one-liner lists the 40 largest files in the repo
 (modify the <code>tail</code> line to change the number):</p>
-<pre><code>$ git rev-list --all --objects | \
+<pre><code>$ 
+git rev-list --all --objects | \
      sed -n $(git rev-list --objects --all | \
      cut -f1 -d' ' | \
      git cat-file --batch-check | \
@@ -360,7 +351,8 @@ git-commit-ectomy is right for you.</p>
 <p>When you're ready to perform the surgery, append a <code>cut</code> command to get the
 relative path to the file <em>only</em>, without listing the size of the file, which
 is what we will need when we carry out the git-commit-ectomy:</p>
-<pre><code>$ git rev-list --all --objects | \
+<pre><code>$ 
+git rev-list --all --objects | \
      sed -n $(git rev-list --objects --all | \
      cut -f1 -d' ' | \
      git cat-file --batch-check | \
@@ -376,17 +368,56 @@ is what we will need when we carry out the git-commit-ectomy:</p>
      cut -f 2 -d' ' 
 </code></pre>
 
+<h1 id="an-ascii-art-crash-course-in-surgery">an ascii art crash course in surgery</h1>
+<p>Suppose our patient has a particularly painful 
+and unnaturally large commit located in their
+commit history:</p>
+<pre><code>            This is the commit
+             to be &quot;ectomied&quot;
+             \/
+             __
+    o---o---(__)---o---o--o
+
+</code></pre>
+
+<p>The git commit ectomy will rewrite the history
+without the problematic commit:</p>
+<pre><code>             __
+    o---o---(__)---o---o---o   old history
+         \
+          \---o----o---o---o   new history
+
+              /\
+            The problematic commit
+             is modified to be smaller
+              in the new history
+</code></pre>
+
+<p>If there is only one branch, no branches or tags 
+or labels will refer to the old history, so the
+commits are not kept in the .git directory.</p>
+<p>Finally, running a <code>git push &lt;remote-name&gt; &lt;branch-name&gt; --force</code>
+will force the old history to be replaced with
+the new history on the remote. Here is the final
+commit history:</p>
+<pre><code>    o---o
+         \
+          \---o----o---o---o   new history
+</code></pre>
+
 <h1 id="demo-surgery-setup">demo surgery: setup</h1>
 <p>Clone an example repo for performing surgery. You don't <em>need</em>
 a remote repository to do the demo surgery, but we will use one
 in our walkthrough.</p>
-<pre><code>$ git clone https://github.com/charlesreid1/git-commit-ectomy-example
+<pre><code>$ 
+git clone https://github.com/charlesreid1/git-commit-ectomy-example
 </code></pre>
 
 <h2 id="side-note-how-to-make-a-fat-file">side note: how to make a fat file</h2>
 <p>We will use the <code>dd</code> command to create files with a specified number
 of bits. For example, to create a 10 MB file, we can issue the command:</p>
-<pre><code class="text">$ dd if=/dev/urandom of=my_big_fat_file bs=1048576 count=10
+<pre><code class="text">$ 
+dd if=/dev/urandom of=my_big_fat_file bs=1048576 count=10
 </code></pre>
 
 <p><strong>Important:</strong> You must use <code>/dev/urandom</code> with a non-zero block size.
@@ -396,28 +427,31 @@ will not store them separately. Then your surgery will go very badly.</p>
 the fact that 1 KB = <code>2^10</code> bytes, and 1 MB = <code>2^10</code> KB, 
 for a total of <code>2^20</code> bytes per megabyte.</p>
 <p><code>count=10</code> means we make 10 blocks, each of size 1 MB (1048576 bytes).</p>
-<h2 id="make-several-text-files">make several text files</h2>
+<h2 id="make-some-text-files">make some text files</h2>
 <p>We start by adding some small boring text files to the repository:</p>
-<pre><code>echo &quot;hello foo&quot; &gt; foo.txt
-echo &quot;hello bar&quot; &gt; bar.txt
+<pre><code>$ 
+echo &quot;hello foo&quot; &gt; foo.txt; echo &quot;hello bar&quot; &gt; bar.txt
 </code></pre>
 
 <p>Now add them to the repo history:</p>
-<pre><code>$ for item in `/bin/ls -1 *.txt`; do
+<pre><code>$ 
+for item in `/bin/ls -1 *.txt`; do
     git add ${item} &amp;&amp; git commit ${item} -m &quot;adding ${item}&quot;
 done
 </code></pre>
 
-<h2 id="make-several-fat-files">make several fat files</h2>
+<h2 id="make-some-fat-files">make some fat files</h2>
 <p>To demonstrate the importance of specifying the path to the
 large files being removed from the repository, we add several
 10 MB files inside of a subdirectory. Start with the directory
 structure:</p>
-<pre><code>$ mkdir data1; mkdir data2
+<pre><code>$ 
+mkdir data1; mkdir data2
 </code></pre>
 
 <p>Now create some files in each of the two directories:</p>
-<pre><code>cd data1/
+<pre><code>$ 
+cd data1/
 dd if=/dev/urandom of=bat bs=1048576 count=10
 dd if=/dev/urandom of=cat bs=1048576 count=10
 dd if=/dev/urandom of=dat bs=1048576 count=10
@@ -431,7 +465,8 @@ cd ../
 </code></pre>
 
 <p>Now we have the following directory structure:</p>
-<pre><code>$ tree .
+<pre><code>$
+tree .
 .
 ├── bar.txt
 ├── data1
@@ -444,18 +479,21 @@ cd ../
 └── foo.txt
 </code></pre>
 
-<pre><code>$ ls -lhg data1
+<pre><code>$ 
+ls -lhg data1
 -rw-r--r--   1 staff    10M Apr 10 18:30 bat
 -rw-r--r--   1 staff    10M Apr 10 18:30 cat
 -rw-r--r--   1 staff    10M Apr 10 18:30 dat
 
-$ ls -lhg data2
+$ 
+ls -lhg data2
 -rw-r--r--   1 staff    10M Apr 10 18:30 fat
 -rw-r--r--   1 staff    10M Apr 10 18:30 rat
 </code></pre>
 
 <p>Also make sure they are unique (hence <code>/dev/random</code> and not <code>/dev/zero</code>):</p>
-<pre><code>$ for i in `/bin/ls -1 data1/*at data2/*at`; do
+<pre><code>$ 
+for i in `/bin/ls -1 data1/*at data2/*at`; do
     md5 ${i}
 done
 
@@ -468,19 +506,22 @@ MD5 (rat) = 77b1c3077041078fd1f371b1bb7dd6e4
 
 <h2 id="commit-files">commit files</h2>
 <p>Add the files to the repo in <em>separate commits</em>:</p>
-<pre><code>for item in data1/bat data1/cat data1/dat data2/fat data2/rat; do
-    git add ${item} &amp;&amp; git commit ${item} -m &quot;Adding ${item}&quot;
+<pre><code>$
+for item in data1/bat data1/cat data1/dat data2/fat data2/rat; do
+    git add ${item} &amp;&amp; git commit ${item} -m &quot;adding ${item}&quot;
 done
 </code></pre>
 
 <p>Now push all the commits to the remote (this will take a while):</p>
-<pre><code>git push origin master
+<pre><code>$
+git push origin master
 </code></pre>
 
 <p>Now you should see everything in the commit history on Github:</p>
 <p><img alt="Repo commit history" src="/img/history.png" /></p>
 <p>You should also see it locally in the git log:</p>
-<pre><code>$ git log --oneline
+<pre><code>$ 
+git log --oneline
 902b0d8 adding rat
 b3376bd adding fat
 e2427de adding dat
@@ -494,44 +535,51 @@ e2427de adding dat
 <h2 id="prepare-tools">prepare tools</h2>
 <p>Use <a href="https://tinyurl.com/git-commit-ectomy">git-forget-blob.sh</a>
 to forget the blob. Start by downloading it:</p>
-<pre><code>$ wget https://tinyurl.com/git-forget-blob-mac-sh -O git-forget-blob.sh
-$ chmod +x git-forget-blob.sh
+<pre><code>$ 
+wget https://tinyurl.com/git-forget-blob-mac-sh -O git-forget-blob.sh
+chmod +x git-forget-blob.sh
 </code></pre>
 
 <p>This script will detect if you are on a Mac,
 and if so, will use the GNU <code>gxargs</code> instead of 
 the BSD <code>xargs</code>. This requires GNU tools to be 
 installed via Homebrew:</p>
-<pre><code>brew install gnu-xargs
+<pre><code>$
+brew install gnu-xargs
 </code></pre>
 
 <p>When installing <code>gnu-xargs</code>, you can also add the <code>--with-default-names</code> flag
 to <code>brew</code> to overwrite the default BSD version of xargs (which is <em>not</em> compatible
 with the GNU version of xargs).</p>
-<pre><code>brew install gnu-xargs --with-default-names
+<pre><code>$
+brew install gnu-xargs --with-default-names
 </code></pre>
 
 <p>To use the <code>git-forget-blob.sh</code> script:</p>
-<pre><code>./git-forget-blob.sh &lt;relative-path-to-file&gt;
+<pre><code>$
+./git-forget-blob.sh &lt;relative-path-to-file&gt;
 </code></pre>
 
 <p>(See below for more detail.)</p>
 <h2 id="the-command-that-doesnt-work-git-rm">the command that doesn't work: git rm</h2>
 <p>Start by checking the size of the repo:</p>
-<pre><code>$ du -hs .git
+<pre><code>$ 
+du -hs .git
  50M    .git
 </code></pre>
 
 <p>Now remove <code>dat</code> using <code>git rm</code>:</p>
-<pre><code>$ git rm dat
-$ git commit dat -m 'Removing dat'
-$ git push origin master
+<pre><code>$ 
+git rm dat
+git commit dat -m 'Removing dat'
+git push origin master
 </code></pre>
 
 <p>This, of course, does not change the size of the repo.
 If we clone a fresh copy from Github, the size of the 
 repo is still the same:</p>
-<pre><code>$ du -hs .git
+<pre><code>$
+du -hs .git
  50M    .git
 </code></pre>
 
@@ -545,7 +593,8 @@ all commits that involve the <code>dat</code> file, and rewriting those commits
 (and, by consequence, all commits that happened after that commit).</p>
 <p>Here is how to permanently remove <code>dat</code> from the repo history and rewrite
 all commits (we specify <code>data1/bat</code> and not <code>bat</code>):</p>
-<pre><code>$ ./git-forget-blob.sh data1/bat
+<pre><code>$ 
+./git-forget-blob.sh data1/bat
 Enumerating objects: 26, done.
 Counting objects: 100% (26/26), done.
 Delta compression using up to 4 threads.
@@ -568,7 +617,8 @@ Total 23 (delta 1), reused 12 (delta 0)
 </code></pre>
 
 <p>Verify it worked by finding size of <code>.git</code> directory</p>
-<pre><code>$ du -hs .git
+<pre><code>$ 
+du -hs .git
  40M    .git
 </code></pre>
 
@@ -577,7 +627,8 @@ Total 23 (delta 1), reused 12 (delta 0)
 without the relative path to the file, git will be looking for
 the file at the top level of the repository, and the file will
 not be found:</p>
-<pre><code>$ ./git-forget-blob.sh bat
+<pre><code>$ 
+./git-forget-blob.sh bat
 Enumerating objects: 26, done.
 Counting objects: 100% (26/26), done.
 Delta compression using up to 4 threads.
@@ -631,7 +682,8 @@ side.</p>
 when we push, which tells the Github remote to rewrite
 whatever commit history it currently has with the 
 commit history that we are pushing.</p>
-<pre><code>$ git push origin master --force
+<pre><code>$ 
+git push origin master --force
 </code></pre>
 
 <p>This will ensure that Github does not keep duplicate
