@@ -280,6 +280,19 @@
     creating patches with git
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#branch-to-branch" title="branch to branch" class="md-nav__link">
+    branch to branch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
       
@@ -330,6 +343,19 @@
     creating patches with git
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#branch-to-branch" title="branch to branch" class="md-nav__link">
+    branch to branch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
       
@@ -359,11 +385,47 @@ you can still save the changes that a particular
 set of commits made to a particular file or set of
 files using the <code>patch</code> utility together with <code>git</code>.</p>
 <h2 id="creating-patches-with-git">creating patches with git</h2>
-<p>git has the ability to create patches using
-<code>git-diff</code> and the <code>--patch</code> flag, which is the
-default behavior.</p>
-<pre><code>git-diff --patch
+<p>git has the ability to create patches two ways.</p>
+<p>The first way is using <code>git format-patch</code>, which
+creates one patch per commit. This method preserves
+meta-information about the commit and is useful for
+transerring changes one commit at a time.</p>
+<p>The second way is using <code>git diff --patch</code>, which
+simply outputs the difference between the two commits,
+without any meta-information.</p>
+<p>We cover the latter method, since it is more general
+and can apply to ranges of commits.</p>
+<h3 id="branch-to-branch">branch to branch</h3>
+<p>Suppose you have some changes to the code that live in
+a separate branch, and you wish to save those changes 
+for later (after the git-commit-ectomy is finished).</p>
+<p>For example:</p>
+<pre><code>                   B   master
+A  o---o---o---o---o
+    \
+     \
+      o---o---o---o 
+                  C   feature_branch
 </code></pre>
+
+<p>To create a patch from the feature branch, it is best to
+run <code>git diff</code> to get the diff between the two branches,
+B and C, rather than the diff between the feature branch
+and the original commit, A and C.</p>
+<p>To produce the patch:</p>
+<pre><code>git diff --patch feature_branch master &gt; make_feature_branch.patch
+</code></pre>
+
+<p>Note that this will <em>not</em> output diff information for binary files.</p>
+<p>To apply the patch, use the <code>git am</code> command
+(note, of all the git subcommand,s this subcommand
+has the <em>absolute worst name imaginable</em>):</p>
+<pre><code>git am &lt; make_feature_branch.patch 
+</code></pre>
+
+<p>Alternatively, it is recommended that you keep the patch in
+cold storage, and only apply it to the master branch when the
+git commit ectomy is finished.</p>
                 
                   
                 
