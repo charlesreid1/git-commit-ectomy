@@ -490,44 +490,122 @@ use the <code>--force</code> flag.)</p>
 you need a gifted surgeon. The more gifted the surgeon,
 the more of your repo history you'll be able to retain.</p>
 <p>Here is a minimal-complications method that removes more 
-of your history than you'd probably want
-(see above note about finding a gifted surgeon). </p>
-<p>This method is to leapfrog a whole series of 
+of your history than you'd probably want.</p>
+<p>The method here is to leapfrog a whole series of 
 complicated splits, merges, rebases, and other tangles,
 and jump directly to a point in the repo where things 
 are saner and calmer. This is done by creating two commits
 (two repo states) that are exactly identical, and which
 can be used as the source and destination of a git rebase 
 operation.</p>
-<p>The battle axe method requires adding one commit to 
-the clusterf--ked branch, which will modify the state
-of the repo to match precisely the state of the repo
-where things are saner and calmer.</p>
-<p>To do this, check out the repo commit where the
-clusterf--k is over, when things are saner and
-calmer:</p>
-<pre><code>git checkout &lt;commit-hash&gt;
+<p>To illustrate: suppose we have a tangled set of changes
+that all added or modified large files in the repository,
+and we wish to simply forget the whole thing ever happened.
+This method will leapfrog every commit between commit A and
+commit D.</p>
+<pre><code>The Tangled Mess (Before):
+
+A       B                       C   D   E (master)
+o-------o-------o-------o-------o---o---o
+         \             /       / 
+          o---o---o---o       /
+           \       \         /
+            o---o---o---o---o
+
+
+
+
+The Fixed Mess (After):
+
+       D'   E' (new_master)
+       o----o
+      /
+     /       (old history 
+    o          is removed)
+    A
 </code></pre>
 
-<p>Now, you're going to copy every single file 
-in that folder into your current (clusterf--ked)
-repo, <em>exactly, word for word, character for character</em>.</p>
-<p>If there are extra files in your current (clusterf--ked)
-repo, those are okay and can be left alone. If you have
-files that are in the saner, calmer commit state, you
-must add those files in to your current (clusterf--ked)
-repo.</p>
-<p>Once everything matches the calmer/saner state, 
+<p>We start by adding one new commit D' to the clusterf--ked branch.
+This will compress all of the changes between A and D into 
+a single commit. The state of the repository at D' should
+match precisely the state of the repository at commit D:</p>
+<pre><code>                                        D'
+       ---------------------------------o
+      /
+     /      B                       C   D   E
+ A  o-------o-------o-------o-------o---o---o
+             \             /       / 
+              o---o---o---o       /
+               \       \         /
+                o---o---o---o---o
+</code></pre>
+
+<p>To do this, check out the repo commit where the
+clusterf--k is gone and when things are saner and
+calmer (that is, commit A):</p>
+<pre><code>git checkout &lt;commit-hash-for-A&gt;
+</code></pre>
+
+<p>Create a new branch at commit A, called <code>new_master</code>,</p>
+<pre><code>git branch new_master
+git checkout new_master
+</code></pre>
+
+<p>Now, you want to bring the repository into the same state
+as the (clusterf--ked) branch, at commit D.</p>
+<p>To do this, copy every single file present in the folder 
+at commit D, into the repository staging area for commit D'.</p>
+<p>You must copy every single file that is in that folder in commit D,
+<em>excatly, word for word, character for character</em>, into D'.</p>
+<p>If there are files that are in A but not in D, those files
+are extra and can be left alone without a problem. </p>
+<p>If there are files that are in D but not in A, you <em>must</em> 
+add those files in when you create commit D'.</p>
+<p>Once your staged commit D' matches the staged commit D,
 commit your changes.</p>
 <p>Tag these two commits as your "Stargates" - these two
-commits are linked by having the repository in the exact
-same state (with exception of extra files), which allows
-you to rebase from one branch to the other. Any changes
-made to files in the repo can be transferred without
-conflicts.</p>
+commits are linked, because the repository is in exactly 
+the same state between commit D and commit D'.</p>
+<p>Commit D is the stargate source, commit D' is the stargate 
+destination.</p>
+<p>The last step is to rebase any commits that were made
+after the mess, that is, made after commit D, onto the new
+cleaner history. We do this using the syntax:</p>
+<pre><code>git rebase --onto &lt;new-head-base&gt; &lt;old-head-base&gt; &lt;branch-to-rebase&gt;
+</code></pre>
+
+<p>or, in terms of the stargate source and destination:</p>
+<pre><code>git rebase --onto &lt;stargate-dest&gt; &lt;stargate-src&gt; &lt;branch-to-rebase&gt;
+</code></pre>
+
+<p>or, in terms of commits D and D': </p>
+<pre><code>git rebase --onto  D'  D  E
+</code></pre>
+
+<p>That allows you to take any commits made on D and rebase
+them onto D'. That way, you can throw away the messy part
+of the commit history but preserve all of the remaining
+commit history. </p>
 <p>Note that you will lose all information about commits 
 that are not rebased or cherry picked, i.e., all the 
 commits that were involved with the clusterf--k.</p>
+<p>The final state of the repo is:</p>
+<pre><code>       D'   E' (new_master)
+       o----o
+      /
+     /       (old history 
+    o          is removed)
+    A
+</code></pre>
+
+<p>Now delete the old <code>master</code> branch:</p>
+<pre><code>git branch -D master
+git push origin :master --force
+</code></pre>
+
+<p>Finally, push the <code>new_master</code> branch to the remote:</p>
+<pre><code>git push origin new_master
+</code></pre>
                 
                   
                 
